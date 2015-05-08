@@ -1,0 +1,27 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+jar {
+	from { 
+		configurations.compile.collect { 
+			it.isDirectory() ? it : zipTree(it) 
+		} 
+	}
+    manifest {
+        attributes 'Main-Class': 'com.alex.jungletiger.JTServer'
+    }
+}
+
+dependencies {
+    compile 'io.netty:netty-all:4.0.27.Final'
+    compile 'org.json:json:20140107'
+    compile 'org.slf4j:slf4j-api:1.7.5'
+    compile 'org.slf4j:slf4j-simple:1.7.5'
+    compile 'org.msgpack:msgpack:0.6.11'
+    // compile 'commons-codec:commons-codec:1.10'
+    // compile 'commons-io:commons-io:2.4'
+}
