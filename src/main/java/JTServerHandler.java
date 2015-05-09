@@ -44,11 +44,6 @@ public class JTServerHandler extends ChannelInboundHandlerAdapter
             ByteBuf rep = Unpooled.copiedBuffer(ie.getMessage().getBytes());
             ctx.write(rep);
         }
-        /*
-        System.out.println("get");
-        ByteBuf rep = Unpooled.copiedBuffer("ok".getBytes());
-        ctx.write(rep);
-        */
     }
 
     @Override

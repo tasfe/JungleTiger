@@ -35,10 +35,11 @@ public final class JTServer
 
         // create worker thread pool
         int workers = json.getJSONObject("jt_server").getInt("workers");
+        String dsn = json.getJSONObject("meta_server").getString("dsn");
         ExecutorService executor = Executors.newFixedThreadPool(workers);
         for (int i = 0; i < workers; i++) 
         {
-            Runnable worker = new JTWorker("jtworker_#" + (i+1), mq);
+            Runnable worker = new JTWorker(dsn, mq);
             executor.execute(worker);
         }
 

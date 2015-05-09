@@ -9,7 +9,10 @@ jar {
 	from { 
 		configurations.compile.collect { 
 			it.isDirectory() ? it : zipTree(it) 
-		} 
+		}
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
 	}
     manifest {
         attributes 'Main-Class': 'com.alex.jungletiger.JTServer'
@@ -22,6 +25,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api:1.7.5'
     compile 'org.slf4j:slf4j-simple:1.7.5'
     compile 'org.msgpack:msgpack:0.6.11'
+    runtime 'mysql:mysql-connector-java:5.1.6'
     // compile 'commons-codec:commons-codec:1.10'
     // compile 'commons-io:commons-io:2.4'
 }
