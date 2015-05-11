@@ -4,9 +4,8 @@ import java.util.concurrent.*;
 import java.sql.*;
 import io.netty.buffer.*;
 import org.slf4j.*;
-// import com.mysql.jdbc.*;
 
-class JTWorker implements Runnable 
+public class JTWorker implements Runnable 
 {
     private String dsn;
     private Logger logger;
@@ -57,26 +56,14 @@ class JTWorker implements Runnable
         {
             if(stmt != null)
             {
-                try
-                {   
-                    stmt.close();   
-                }
-                catch(SQLException e)
-                {   
-                    e.printStackTrace();   
-                }   
+                try {stmt.close();}
+                catch(SQLException e) {e.printStackTrace();}   
             }
 
             if(conn != null)
             {
-                try
-                {   
-                    conn.close(); 
-                }
-                catch(SQLException e)
-                {   
-                    e.printStackTrace();   
-                }
+                try {conn.close();}
+                catch(SQLException e) {e.printStackTrace();}
             }
         }
     }

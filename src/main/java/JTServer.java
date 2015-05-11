@@ -13,6 +13,7 @@ import org.json.*;
 public final class JTServer 
 {
     private static JSONObject json;
+    private Logger logger = LoggerFactory.getLogger(JTServer.class);
 
     public static void main(String[] args) throws Exception 
     {
@@ -26,8 +27,16 @@ public final class JTServer
 
     private void run() throws Exception
     {
-        Logger logger = LoggerFactory.getLogger(JTServer.class);
-        logger.info("MySQL Server run ...");
+        logger.info(">>>> jungletiger run ...");
+
+        ExecutorService p1 = Executors.newSingleThreadExecutor();
+        Runnable t1 = new JTAdmin(json.getJSONObject("jt_admin").getInt("port"));
+        p1.execute(t1);
+    }
+
+    private void createWorkers() throws InterruptedException
+    {
+        logger.info(">>>> create workers ...");
 
         // create message queue
         int size = json.getJSONObject("jt_server").getInt("queue_size");
@@ -37,6 +46,66 @@ public final class JTServer
         int workers = json.getJSONObject("jt_server").getInt("workers");
         String dsn = json.getJSONObject("meta_server").getString("dsn");
         ExecutorService executor = Executors.newFixedThreadPool(workers);
+        
+        for (int i = 0; i < workers; i++) 
+        {
+            Runnable worker = new JTWorker(dsn, mq);
+            executor.execute(worker);
+        }
+
+        // Configure the server.
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try 
+        {
+            ServerBootstrap b = new ServerBootstrap();
+            b.option(ChannelOption.SO_BACKLOG, 1024);
+            b.group(bossGroup, workerGroup);
+            b.channel(NioServerSocketChannel.class);
+            b.handler(new LoggingHandler(LogLevel.INFO));
+            b.childHandler(new JTServerInitializer(mq));
+
+            Channel ch = b.bind(json.getJSONObject("jt_server").getInt("port")).sync().channel();
+            ch.closeFuture().sync();
+        } 
+        finally 
+        {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+
+        executor.shutdown();
+        while (!executor.isTerminated()) 
+        {}
+    }
+
+    /*
+    private void run() throws Exception
+    {
+        Logger logger = LoggerFactory.getLogger(JTServer.class);
+        logger.info(">>>> jungletiger run ...");
+
+        // create message queue
+        int size = json.getJSONObject("jt_server").getInt("queue_size");
+        ArrayBlockingQueue mq = new ArrayBlockingQueue(size, true);
+        ArrayBlockingQueue adminq = new ArrayBlockingQueue(1, true);
+
+        // create admin thread
+        String metaServerDSN = json.getJSONObject("meta_server").getString("dsn");
+        CountDownLatch latch = new CountDownLatch(1); // wait admin thread run
+        ExecutorService adminpool = Executors.newSingleThreadExecutor();
+        Runnable admin = new JTAdmin(metaServerDSN, adminq, latch);
+
+        logger.info(">>>> create admin thread ...");
+        adminpool.execute(admin);
+        latch.await();
+
+        // create worker thread pool
+        int workers = json.getJSONObject("jt_server").getInt("workers");
+        String dsn = json.getJSONObject("meta_server").getString("dsn");
+        ExecutorService executor = Executors.newFixedThreadPool(workers);
+        
+        logger.info(">>>> create workers ... ");
         for (int i = 0; i < workers; i++) 
         {
             Runnable worker = new JTWorker(dsn, mq);
@@ -69,6 +138,7 @@ public final class JTServer
         {}
         System.out.println("Finished all threads");
     }
+    */
 
     private static void loadJsonConfig(String filename) throws Exception 
     {
