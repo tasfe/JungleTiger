@@ -9,17 +9,17 @@ import io.netty.bootstrap.*;
 import io.netty.channel.*;
 import io.netty.buffer.*;
 import org.slf4j.*;
+import org.json.*;
 
 public class JTAdmin implements Runnable 
 {
-    private String dsn;
-    private int port;
     private Logger logger;
+    private JSONObject json;
 
-    public JTAdmin(int port) 
+    public JTAdmin(JSONObject json) 
     {
         logger = LoggerFactory.getLogger(JTWorker.class);
-        this.port = port;
+        this.json = json;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class JTAdmin implements Runnable
             b.handler(new LoggingHandler(LogLevel.INFO));
             b.childHandler(new JTAdminInitializer());
 
-            Channel ch = b.bind(port).sync().channel();
+            Channel ch = b.bind(json.getInt("port")).sync().channel();
             ch.closeFuture().sync();
         }
         catch (InterruptedException ie)

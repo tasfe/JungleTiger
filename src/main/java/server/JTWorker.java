@@ -21,6 +21,7 @@ public class JTWorker implements Runnable
     @Override
     public void run()
     {
+        /*
         java.sql.Connection conn = null;
         java.sql.Statement stmt = null;
 
@@ -66,5 +67,6 @@ public class JTWorker implements Runnable
                 catch(SQLException e) {e.printStackTrace();}
             }
         }
+        */
     }
 }

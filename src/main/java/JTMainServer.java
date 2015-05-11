@@ -12,8 +12,8 @@ import org.json.*;
 
 public final class JTMainServer 
 {
-    private static JSONObject json;
     private Logger logger = LoggerFactory.getLogger(JTMainServer.class);
+    static JSONObject json;
 
     public static void main(String[] args) throws Exception 
     {
@@ -30,7 +30,7 @@ public final class JTMainServer
         logger.info(">>>> jungletiger run ...");
 
         ExecutorService p1 = Executors.newSingleThreadExecutor();
-        Runnable t1 = new JTAdmin(json.getJSONObject("jt_admin").getInt("port"));
+        Runnable t1 = new JTAdmin(json.getJSONObject("jt_admin"));
         p1.execute(t1);
 
         ExecutorService p2 = Executors.newSingleThreadExecutor();
